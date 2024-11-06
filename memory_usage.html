@@ -319,6 +319,7 @@
       <div class="container-grafik">
         <div id="ContainmemoryChart" class="chart-container" data-aos="fade-left" data-aos-duration="1000">
             <h1>Grafik Memory Usage</h1>
+            <p id="dayFromFile"></p>
             <canvas id="memoryUsageChart"></canvas>
         </div>
       </div>
@@ -337,20 +338,26 @@
         const last100Lines = lines.slice(-100);
 
         const timestamps = [];
+        const days = [];
         const cpuUsage = [];
         const memoryAvailable = [];
         const storageAvailable = [];
 
         // Memproses 100 baris terakhir
         last100Lines.forEach(line => {
-            const [timestamp, cpu, memory, storage] = line.split('|').map(item => item.trim());
+            const [day, timestamp, cpu, memory, storage] = line.split('|').map(item => item.trim());
+            days.push(day);
             timestamps.push(timestamp);
             cpuUsage.push(parseFloat(cpu));
             memoryAvailable.push(parseFloat(memory));
             storageAvailable.push(parseFloat(storage));
         });
 
-        return { timestamps, cpuUsage, memoryAvailable, storageAvailable };
+        if (days.length > 0) {
+        document.getElementById("dayFromFile").innerText = `${days[0]}`;
+        }
+
+        return { timestamps, days, cpuUsage, memoryAvailable, storageAvailable };
       }
 
 

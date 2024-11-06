@@ -318,87 +318,94 @@
       <div class="container-grafik">
         <div id="ContainstorageChart" class="chart-container" data-aos="fade-left" data-aos-duration="1000">
             <h1>Grafik Storage Usage</h1>
+            <p id="dayFromFile"></p>
             <canvas id="storageUsageChart"></canvas>
-        </div>
+          </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-      async function fetchData() {
-        const response = await fetch('data/data_time.txt');
-        const text = await response.text();
+    async function fetchData() {
+    const response = await fetch('data/data_time.txt');
+    const text = await response.text();
 
-        // Memisahkan teks menjadi array baris dan memfilter baris yang mengandung karakter '|'
-        const lines = text.trim().split('\n').filter(line => line.includes('|'));
+    // Memisahkan teks menjadi array baris dan memfilter baris yang mengandung karakter '|'
+    const lines = text.trim().split('\n').filter(line => line.includes('|'));
 
-        // Mengambil 100 baris terakhir
-        const last100Lines = lines.slice(-100);
+    // Mengambil 100 baris terakhir
+    const last100Lines = lines.slice(-100);
 
-        const timestamps = [];
-        const cpuUsage = [];
-        const memoryAvailable = [];
-        const storageAvailable = [];
+    const timestamps = [];
+    const days = []; // Array untuk menyimpan nama hari
+    const cpuUsage = [];
+    const memoryAvailable = [];
+    const storageAvailable = [];
 
-        // Memproses 100 baris terakhir
-        last100Lines.forEach(line => {
-            const [timestamp, cpu, memory, storage] = line.split('|').map(item => item.trim());
-            timestamps.push(timestamp);
-            cpuUsage.push(parseFloat(cpu));
-            memoryAvailable.push(parseFloat(memory));
-            storageAvailable.push(parseFloat(storage));
-        });
+    // Memproses 100 baris terakhir
+    last100Lines.forEach(line => {
+        const [day, timestamp, cpu, memory, storage] = line.split('|').map(item => item.trim());
+        days.push(day); // Menyimpan nama hari
+        timestamps.push(timestamp);
+        cpuUsage.push(parseFloat(cpu));
+        memoryAvailable.push(parseFloat(memory));
+        storageAvailable.push(parseFloat(storage));
+    });
 
-        return { timestamps, cpuUsage, memoryAvailable, storageAvailable };
+    // Menampilkan hari pertama dari data di file dalam elemen HTML
+    if (days.length > 0) {
+        document.getElementById("dayFromFile").innerText = `${days[0]}`;
     }
 
+    return { timestamps, days, cpuUsage, memoryAvailable, storageAvailable };
+}
 
-    async function renderCharts() {
-        const data = await fetchData();
+async function renderCharts() {
+    const data = await fetchData();
 
-        // Grafik untuk Storage Usage
-        const ctx4 = document.getElementById('storageUsageChart').getContext('2d');
-        const storageUsageChart = new Chart(ctx4, {
-            type: 'line',
-            data: {
-                labels: data.timestamps,
-                datasets: [{
-                    label: 'Storage Available (MB)',
-                    data: data.storageAvailable,
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    fill: false,
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        display: true,
-                        title: { display: true, text: 'Timestamp' }
-                    },
-                    y: {
-                        display: true,
-                        title: { display: true, text: 'Value' }
-                    }
+    // Grafik untuk Storage Usage
+    const ctx4 = document.getElementById('storageUsageChart').getContext('2d');
+    const storageUsageChart = new Chart(ctx4, {
+        type: 'line',
+        data: {
+            labels: data.timestamps,
+            datasets: [{
+                label: 'Storage Available (MB)',
+                data: data.storageAvailable,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    display: true,
+                    title: { display: true, text: 'Timestamp' }
+                },
+                y: {
+                    display: true,
+                    title: { display: true, text: 'Value' }
                 }
             }
-        });
-
-        // Fungsi untuk memperbarui grafik
-        function updateCharts() {
-            fetchData().then(newData => {
-                // Memperbarui grafik Storage Usage
-                storageUsageChart.data.labels = newData.timestamps;
-                storageUsageChart.data.datasets[0].data = newData.storageAvailable;
-                storageUsageChart.update();
-            });
         }
+    });
 
-        // Update setiap 10 menit (600000 ms)
-        setInterval(updateCharts, 6000);
+    // Fungsi untuk memperbarui grafik
+    function updateCharts() {
+        fetchData().then(newData => {
+            // Memperbarui grafik Storage Usage
+            storageUsageChart.data.labels = newData.timestamps;
+            storageUsageChart.data.datasets[0].data = newData.storageAvailable;
+            storageUsageChart.update();
+        });
     }
 
-    renderCharts();
+    setInterval(updateCharts, 6000);
+}
+
+renderCharts();
+
     </script>
     <script>
         const links = document.querySelectorAll('.side-menu a');
