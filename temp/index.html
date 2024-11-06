@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usage Data</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Mengatur tampilan tombol agar berbaris ke samping kanan */
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        body {
+            font-family: 'Rubik', sans-serif;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            background-color: black;
+            padding-inline: 96px;
+            padding: 20px;
+        }
+
+        .container{
+            padding-inline: 96px;
+        }
+
+        .button-group button {
+            padding: 17px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            border: none;
+            background: white;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        .button-group button:hover{
+            background: rgb(238, 238, 174);
+
+        }
+
+        /* Menyembunyikan semua canvas secara default */
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Tombol untuk memilih grafik -->
+    <div class="button-group">
+        <button onclick="showChart('combinedChart')">Grafik Gabungan</button>
+        <button onclick="showChart('cpuUsageChart')">Grafik CPU Usage</button>
+        <button onclick="showChart('memoryUsageChart')">Grafik Memory Usage</button>
+        <button onclick="showChart('storageUsageChart')">Grafik Storage Usage</button>
+    </div>
+
+    <div class="container">
+        
+        <!-- Canvas untuk masing-masing grafik -->
+        <div id="ContaincombinedChart">
+            <h1>Grafik Gabungan</h1>
+            <canvas id="combinedChart"></canvas>
+        </div>
+        <div id="ContaincpuUsageChart">
+            <h1>Grafik CPU Usage</h1>
+            <canvas ></canvas>
+        </div>
+        <div id="ContainmemoryUsageChart">
+            <h1>Grafik Memory Usage</h1>
+            <canvas id="memoryUsageChart"></canvas>
+        </div>
+        <div id="ContainstorageUsageChart">
+            <h1>Grafik Storage Usage</h1>
+            <canvas id="storageUsageChart"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Fungsi untuk menampilkan grafik yang dipilih
+        function showChart(chartId) {
+            // Sembunyikan semua grafik terlebih dahulu
+            document.getElementById('combinedChart').style.display = 'none';
+            document.getElementById('cpuUsageChart').style.display = 'none';
+            document.getElementById('memoryUsageChart').style.display = 'none';
+            document.getElementById('storageUsageChart').style.display = 'none';
+
+            // Tampilkan grafik yang dipilih berdasarkan ID
+            document.getElementById(chartId).style.display = 'block';
+        }
+
+        // Menampilkan grafik pertama kali saat halaman dimuat
+        window.onload = () => showChart('combinedChart');
+        async function fetchData() {
+            const response = await fetch('data/waktu.txt');
+            const text = await response.text();
+
+            // Memisahkan teks menjadi array baris dan memfilter baris yang mengandung karakter '|'
+            const lines = text.trim().split('\n').filter(line => line.includes('|'));
+
+            // Mengambil 100 baris terakhir
+            const last100Lines = lines.slice(-100);
+
+            const timestamps = [];
+            const cpuUsage = [];
+            const memoryAvailable = [];
+            const storageAvailable = [];
+
+            // Memproses 100 baris terakhir
+            last100Lines.forEach(line => {
+                const [timestamp, cpu, memory, storage] = line.split('|').map(item => item.trim());
+                timestamps.push(timestamp);
+                cpuUsage.push(parseFloat(cpu));
+                memoryAvailable.push(parseFloat(memory));
+                storageAvailable.push(parseFloat(storage));
+            });
+
+            return { timestamps, cpuUsage, memoryAvailable, storageAvailable };
+        }
+
+
+        async function renderCharts() {
+            const data = await fetchData();
+
+            // Grafik gabungan
+            const ctx1 = document.getElementById('combinedChart').getContext('2d');
+            const combinedChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: data.timestamps,
+                    datasets: [
+                        {
+                            label: 'CPU Usage (%)',
+                            data: data.cpuUsage,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            fill: false,
+                        },
+                        {
+                            label: 'Memory Available (MB)',
+                            data: data.memoryAvailable,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            fill: false,
+                        },
+                        {
+                            label: 'Storage Available (MB)',
+                            data: data.storageAvailable,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            fill: false,
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            display: true,
+                            title: { display: true, text: 'Timestamp' }
+                        },
+                        y: {
+                            display: true,
+                            title: { display: true, text: 'Value' }
+                        }
+                    }
+                }
+            });
+
+            // Grafik untuk CPU Usage
+            const ctx2 = document.getElementById('cpuUsageChart').getContext('2d');
+            const cpuUsageChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: data.timestamps,
+                    datasets: [{
+                        label: 'CPU Usage (%)',
+                        data: data.cpuUsage,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            display: true,
+                            title: { display: true, text: 'Timestamp' }
+                        },
+                        y: {
+                            display: true,
+                            title: { display: true, text: 'Value' }
+                        }
+                    }
+                }
+            });
+
+            // Grafik untuk Memory Usage
+            const ctx3 = document.getElementById('memoryUsageChart').getContext('2d');
+            const memoryUsageChart = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: data.timestamps,
+                    datasets: [{
+                        label: 'Memory Available (MB)',
+                        data: data.memoryAvailable,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            display: true,
+                            title: { display: true, text: 'Timestamp' }
+                        },
+                        y: {
+                            display: true,
+                            title: { display: true, text: 'Value' }
+                        }
+                    }
+                }
+            });
+
+            // Grafik untuk Storage Usage
+            const ctx4 = document.getElementById('storageUsageChart').getContext('2d');
+            const storageUsageChart = new Chart(ctx4, {
+                type: 'line',
+                data: {
+                    labels: data.timestamps,
+                    datasets: [{
+                        label: 'Storage Available (MB)',
+                        data: data.storageAvailable,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            display: true,
+                            title: { display: true, text: 'Timestamp' }
+                        },
+                        y: {
+                            display: true,
+                            title: { display: true, text: 'Value' }
+                        }
+                    }
+                }
+            });
+
+            // Fungsi untuk memperbarui grafik
+            function updateCharts() {
+                fetchData().then(newData => {
+                    // Memperbarui data grafik gabungan
+                    combinedChart.data.labels = newData.timestamps;
+                    combinedChart.data.datasets[0].data = newData.cpuUsage;
+                    combinedChart.data.datasets[1].data = newData.memoryAvailable;
+                    combinedChart.data.datasets[2].data = newData.storageAvailable;
+                    combinedChart.update();
+
+                    // Memperbarui grafik CPU Usage
+                    cpuUsageChart.data.labels = newData.timestamps;
+                    cpuUsageChart.data.datasets[0].data = newData.cpuUsage;
+                    cpuUsageChart.update();
+
+                    // Memperbarui grafik Memory Usage
+                    memoryUsageChart.data.labels = newData.timestamps;
+                    memoryUsageChart.data.datasets[0].data = newData.memoryAvailable;
+                    memoryUsageChart.update();
+
+                    // Memperbarui grafik Storage Usage
+                    storageUsageChart.data.labels = newData.timestamps;
+                    storageUsageChart.data.datasets[0].data = newData.storageAvailable;
+                    storageUsageChart.update();
+                });
+            }
+
+            // Update setiap 10 menit (600000 ms)
+            setInterval(updateCharts, 6000);
+        }
+
+        renderCharts();
+
+    </script>
+</body>
+</html>

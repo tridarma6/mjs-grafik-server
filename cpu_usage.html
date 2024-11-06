@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"
+    />
+    <link rel="stylesheet" href="styleDashboard.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"
+    />
+    <title>Grafik Gabungan</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+
+      :root {
+        --main-color: #fe804a;
+        --color-dark: #34425a;
+        --text-grey: #b0b0b0;
+        --pink: #f93939;
+        --black: var(--color-dark);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        text-decoration: none;
+        list-style-type: none;
+        box-sizing: border-box;
+        font-family: "Rubik", sans-serif;
+      }
+
+      #menu-toggle {
+        display: none;
+      }
+
+      .sidebar {
+        position: fixed;
+        height: 100%;
+        width: 165px;
+        left: 0;
+        bottom: 0;
+        top: 0;
+        z-index: 100;
+        background: var(--color-dark);
+        transition: left 300ms;
+      }
+
+      .side-header {
+        box-shadow: 0px 5px 5px -5px rgb(0 0 0 /10%);
+        background: var(--main-color);
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .side-header h3,
+      side-head span {
+        color: #fff;
+        font-weight: 400;
+      }
+
+      .side-content {
+        height: calc(100vh - 60px);
+        overflow: auto;
+      }
+
+      /* width */
+      .side-content::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      /* Track */
+      .side-content::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 5px grey;
+        border-radius: 10px;
+      }
+
+      /* Handle */
+      .side-content::-webkit-scrollbar-thumb {
+        background: #b0b0b0;
+        border-radius: 10px;
+      }
+
+      /* Handle on hover */
+      .side-content::-webkit-scrollbar-thumb:hover {
+        background: #b30000;
+      }
+
+      .profile {
+        text-align: center;
+        padding: 2rem 0rem;
+        text-wrap: wrap;
+      }
+
+      .bg-img {
+        background-repeat: no-repeat;
+        background-size: cover;
+        border-radius: 50%;
+        background-size: cover;
+      }
+
+      .profile-img {
+        height: 100px;
+        width: 100px;
+        border-radius: 0; 
+        display: block;
+        margin: 0 auto;
+        object-fit: contain; 
+        border: none; 
+        background: none; 
+      }
+
+      .profile h3 {
+        color: #e8e7eb;
+        font-weight: 500;
+      }
+
+      .profile small {
+        color: #899dc1;
+        font-weight: 600;
+      }
+
+      .sidebar {
+        /*overflow-y: auto;*/
+      }
+
+      .side-menu ul {
+        text-align: center;
+      }
+
+      .side-menu a {
+        display: block;
+        padding: 1.2rem 0rem;
+      }
+
+      .side-menu a.active {
+        background: #2b384e;
+      }
+
+      .side-menu a.active span,
+      .side-menu a.active small {
+        color: #fff;
+      }
+
+      .side-menu a span {
+        display: block;
+        text-align: center;
+        font-size: 1.7rem;
+      }
+
+      .side-menu a span,
+      .side-menu a small {
+        color: #899dc1;
+      }
+
+      #menu-toggle:checked ~ .sidebar {
+        width: 60px;
+      }
+
+      #menu-toggle:checked ~ .sidebar .side-header span {
+        display: none;
+      }
+
+      #menu-toggle:checked ~ .main-content {
+        margin-left: 60px;
+        width: calc(100% - 60px);
+      }
+
+      #menu-toggle:checked ~ .main-content header {
+        left: 60px;
+      }
+
+      #menu-toggle:checked ~ .sidebar .profile,
+      #menu-toggle:checked ~ .sidebar .side-menu a small {
+        display: none;
+      }
+
+      #menu-toggle:checked ~ .sidebar .side-menu a span {
+        font-size: 1.3rem;
+      }
+
+      .main-content {
+        margin-left: 165px;
+        width: calc(100% - 165px);
+        transition: margin-left 300ms;
+      }
+
+      header {
+        position: sticky;
+        right: 0;
+        top: 0;
+        left: 165px;
+        z-index: 100;
+        height: 60px;
+        box-shadow: 0px 5px 5px -5px rgb(0 0 0 /10%);
+        background: #e8e7eb;
+        transition: left 300ms;
+      }
+
+      .header-content,
+      .header-menu {
+        display: flex;
+        align-items: center;
+      }
+
+      .header-content {
+        justify-content: space-between;
+        padding: 0rem 1rem;
+        padding-top: 28px;
+      }
+
+      .header-content label:first-child span {
+        font-size: 1.3rem;
+      }
+
+      .header-content label {
+        cursor: pointer;
+      }
+
+      .header-menu {
+        justify-content: flex-end;
+        padding-top: 0.5rem;
+      }
+
+      .chart-container{
+        padding-inline: 58px;
+        padding-top: 24px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <input type="checkbox" id="menu-toggle" />
+    <div class="sidebar">
+        <div class="side-header">
+          <h2>M<span>JS</span></h2>
+        </div>
+        <div class="side-content">
+            <div class="profile">
+                <img src="udayana-icon.png" alt="" class="profile-img">
+                <h3>Universitas Udayana</h3>
+            </div>
+  
+          <div class="side-menu">
+            <ul>
+              <li>
+                  <a href="index.html">
+                      <span 
+                          class="las la-user-alt"
+                          style="color: #85878a"
+                      >
+                      </span>
+                      <small>Profile</small>
+                  </a>
+              </li>
+              <li>
+                  <a href="combine_chart.html">
+                      <span
+                          class="fa-solid fa-chart-simple"
+                          style="color: #85878a"
+                      >
+                      </span>
+                      <small>Grafik Gabungan</small>
+                  </a>
+              </li>
+              <li>
+                  <a href="cpu_usage.html">
+                      <span 
+                          class="fa-solid fa-server"
+                          style="color: #85878a"
+                      >
+                      </span>
+                      <small>CPU Usage</small>
+                  </a>
+              </li>
+              <li>
+                  <a href="memory_usage.html">
+                      <span 
+                          class="fa-solid fa-memory"
+                          style="color: #85878a"
+                      >
+                      </span>
+                      <small>Memory Usage</small>
+                  </a>
+              </li>
+              <li>
+                  <a href="storage_usage.html">
+                      <span 
+                          class="fa-solid fa-database"
+                          style="color: #85878a">
+                      </span>
+                      <small>Storage Usage</small>
+                  </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    <div class="main-content">
+      <header>
+        <div class="header-content">
+          <label for="menu-toggle"><span class="las la-bars"></span></label>
+          <h3 style="color: var(--main-color)">Manajemen Jaringan dan Server <span style="color: var(--text-grey);">(D)</span></h3>
+        </div>
+      </header>
+      <div class="container-grafik">
+        <div id="ContaincpuChart" class="chart-container" data-aos="fade-left" data-aos-duration="1000">
+            <h1>Grafik CPU Usage</h1>
+            <canvas id="cpuUsageChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        async function fetchData() {
+            const response = await fetch('data/data_time.txt');
+            const text = await response.text();
+
+            const lines = text.trim().split('\n').filter(line => line.includes('|'));
+            const last100Lines = lines.slice(-100);
+
+            const timestamps = [];
+            const cpuUsage = [];
+
+            last100Lines.forEach(line => {
+                const [timestamp, cpu] = line.split('|').map(item => item.trim());
+                timestamps.push(timestamp);
+                cpuUsage.push(parseFloat(cpu));
+            });
+
+            return { timestamps, cpuUsage };
+        }
+
+        fetchData().then(data => {
+            const ctx = document.getElementById('cpuUsageChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.timestamps,
+                    datasets: [{ label: 'CPU Usage (%)', data: data.cpuUsage, borderColor: 'rgba(75, 192, 192, 1)', fill: false }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { display: true, title: { display: true, text: 'Timestamp' }},
+                        y: { display: true, title: { display: true, text: 'Value' }}
+                    }
+                }
+            });
+        });
+    </script>
+    <script>
+        const links = document.querySelectorAll('.side-menu a');
+        
+        const currentPath = window.location.pathname.split('/').pop();
+
+        links.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        AOS.init();
+    </script>
+  </body>
+</html>
