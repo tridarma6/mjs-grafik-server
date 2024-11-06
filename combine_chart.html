@@ -322,13 +322,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       async function fetchData() {
-        const response = await fetch("data/data_time.txt");
+        const response = await fetch('data/waktu.txt');
         const text = await response.text();
 
-        const lines = text
-          .trim()
-          .split("\n")
-          .filter((line) => line.includes("|"));
+        // Memisahkan teks menjadi array baris dan memfilter baris yang mengandung karakter '|'
+        const lines = text.trim().split('\n').filter(line => line.includes('|'));
+
+        // Mengambil 100 baris terakhir
         const last100Lines = lines.slice(-100);
 
         const timestamps = [];
@@ -336,55 +336,81 @@
         const memoryAvailable = [];
         const storageAvailable = [];
 
-        last100Lines.forEach((line) => {
-          const [timestamp, cpu, memory, storage] = line
-            .split("|")
-            .map((item) => item.trim());
-          timestamps.push(timestamp);
-          cpuUsage.push(parseFloat(cpu));
-          memoryAvailable.push(parseFloat(memory));
-          storageAvailable.push(parseFloat(storage));
+        // Memproses 100 baris terakhir
+        last100Lines.forEach(line => {
+            const [timestamp, cpu, memory, storage] = line.split('|').map(item => item.trim());
+            timestamps.push(timestamp);
+            cpuUsage.push(parseFloat(cpu));
+            memoryAvailable.push(parseFloat(memory));
+            storageAvailable.push(parseFloat(storage));
         });
 
         return { timestamps, cpuUsage, memoryAvailable, storageAvailable };
-      }
+    }
 
-      fetchData().then((data) => {
-        const ctx = document.getElementById("combinedChart").getContext("2d");
-        new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: data.timestamps,
-            datasets: [
-              {
-                label: "CPU Usage (%)",
-                data: data.cpuUsage,
-                borderColor: "rgba(75, 192, 192, 1)",
-                fill: false,
-              },
-              {
-                label: "Memory Available (MB)",
-                data: data.memoryAvailable,
-                borderColor: "rgba(54, 162, 235, 1)",
-                fill: false,
-              },
-              {
-                label: "Storage Available (MB)",
-                data: data.storageAvailable,
-                borderColor: "rgba(255, 99, 132, 1)",
-                fill: false,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            scales: {
-              x: { display: true, title: { display: true, text: "Timestamp" } },
-              y: { display: true, title: { display: true, text: "Value" } },
+
+    async function renderCharts() {
+        const data = await fetchData();
+
+        // Grafik gabungan
+        const ctx1 = document.getElementById('combinedChart').getContext('2d');
+        const combinedChart = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: data.timestamps,
+                datasets: [
+                    {
+                        label: 'CPU Usage (%)',
+                        data: data.cpuUsage,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        fill: false,
+                    },
+                    {
+                        label: 'Memory Available (MB)',
+                        data: data.memoryAvailable,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        fill: false,
+                    },
+                    {
+                        label: 'Storage Available (MB)',
+                        data: data.storageAvailable,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        fill: false,
+                    },
+                ]
             },
-          },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        display: true,
+                        title: { display: true, text: 'Timestamp' }
+                    },
+                    y: {
+                        display: true,
+                        title: { display: true, text: 'Value' }
+                    }
+                }
+            }
         });
-      });
+        // Fungsi untuk memperbarui grafik
+        function updateCharts() {
+            fetchData().then(newData => {
+                // Memperbarui data grafik gabungan
+                combinedChart.data.labels = newData.timestamps;
+                combinedChart.data.datasets[0].data = newData.cpuUsage;
+                combinedChart.data.datasets[1].data = newData.memoryAvailable;
+                combinedChart.data.datasets[2].data = newData.storageAvailable;
+                combinedChart.update();
+            });
+        }
+
+        // Update setiap 10 menit (600000 ms)
+        setInterval(updateCharts, 6000);
+    }
+
+    renderCharts();
+      
     </script>
 
     <script>
