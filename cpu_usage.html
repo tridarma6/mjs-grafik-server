@@ -333,7 +333,7 @@
 
         // Memisahkan teks menjadi array baris dan memfilter baris yang mengandung karakter '|'
         const lines = text.trim().split('\n').filter(line => line.includes('|'));
-
+      
         // Mengambil 100 baris terakhir
         const last100Lines = lines.slice(-100);
 
@@ -410,6 +410,7 @@
 
       renderCharts();
     </script>
+    
     <script>
         const links = document.querySelectorAll('.side-menu a');
         
